@@ -148,6 +148,7 @@ internal class AdFilterImpl constructor(appContext: Context) : AdFilter {
             ?: return@runBlocking FilterResult(null, url, null)
 
         val resourceType = ResourceType.from(request)
+        android.util.Log.e("AdFilter", "shouldIntercept: url=$url docUrl=$documentUrl type=$resourceType isEnabled=${viewModel.isEnabled.value}")
 
         val result = shouldIntercept(url, documentUrl, resourceType)
         if (result.shouldBlock && resourceType.isVisibleResource()) {

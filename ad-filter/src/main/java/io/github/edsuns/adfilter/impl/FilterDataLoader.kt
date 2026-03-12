@@ -1,5 +1,6 @@
 package io.github.edsuns.adfilter.impl
 
+import android.util.Log
 import io.github.edsuns.adblockclient.AdBlockClient
 import io.github.edsuns.adfilter.CustomFilter
 import timber.log.Timber
@@ -18,11 +19,13 @@ internal class FilterDataLoader(
             client.loadProcessedData(binaryDataStore.loadData(id))
             if (id == ID_CUSTOM) {
                 detector.customFilterClient = client
+                Log.e("FilterLoader", "Loaded custom filter client: $id, filtersCount=${client.getFiltersCount()}")
             } else {
                 detector.addClient(client)
+                Log.e("FilterLoader", "Loaded filter client: $id, filtersCount=${client.getFiltersCount()}")
             }
         } else {
-            Timber.v("Couldn't find client processed data: $id")
+            Log.e("FilterLoader", "NO DATA for filter: $id")
         }
     }
 

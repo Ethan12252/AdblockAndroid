@@ -1,5 +1,6 @@
 package io.github.edsuns.adfilter.impl
 
+import android.util.Log
 import io.github.edsuns.adblockclient.Client
 import io.github.edsuns.adblockclient.MatchResult
 import io.github.edsuns.adblockclient.ResourceType
@@ -72,12 +73,15 @@ internal class DetectorImpl : Detector {
         documentUrl: String,
         resourceType: ResourceType
     ): String? {
+        Log.e("Detector", "shouldBlock: clients=${clients.size}, customFilter=${customFilterClient != null}, url=$url")
         // custom filter have a higher priority, match it first
         customFilterClient?.matches(url, documentUrl, resourceType)?.let {
             if (it.hasException) {
+                Timber.d("URL $url Whitelisted by custom filter rule: ${it.matchedRule}")
                 return null// don't block exception
             }
             if (it.shouldBlock) {
+                Timber.d("URL $url Blocked by custom filter rule: ${it.matchedRule}")
                 return it.matchedRule
             }
         }
@@ -86,11 +90,16 @@ internal class DetectorImpl : Detector {
         for (client in clients) {
             val match: MatchResult = client.matches(url, documentUrl, resourceType)
             if (match.hasException) {
+                Timber.d("URL $url Whitelisted by filter [${client.id}] rule: ${match.matchedRule}")
                 return null// don't block exception
             }
             if (match.shouldBlock) {
                 shouldBlock = match
+                Timber.d("URL $url Blocked by filter [${client.id}] rule: ${match.matchedRule}")
             }
+        }
+        if (shouldBlock == null) {
+            Timber.d("URL $url Allowed (no matching rules found)")
         }
         return shouldBlock?.matchedRule
     }
